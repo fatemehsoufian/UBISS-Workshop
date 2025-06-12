@@ -1,6 +1,11 @@
 package org.uni.myapplication
 
+import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -10,48 +15,36 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Popup
+import androidx.compose.ui.window.PopupProperties
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
-import kotlinx.coroutines.delay
 import org.uni.myapplication.ui.theme.MyApplicationTheme
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
-import androidx.compose.material3.Switch
-import androidx.compose.material3.SwitchDefaults
-import androidx.compose.ui.Alignment
-import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.offset
-import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.window.Popup
-import androidx.compose.ui.window.PopupProperties
-import androidx.compose.ui.unit.IntOffset
 
 
 @Composable
@@ -64,8 +57,8 @@ fun MainScreen(viewModel: SunlightViewModel = hiltViewModel()) {
                 .padding(horizontal = 8.dp)
                 .padding(it)
         ) {
-            sunlightInfo?.let {
-                SunlightProgressBar(it)
+            sunlightInfo?.let {info->
+                SunlightProgressBar(info)
             } ?: run {
                 CircularProgressIndicator()
             }
@@ -94,36 +87,20 @@ fun MainScreen(viewModel: SunlightViewModel = hiltViewModel()) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MyTopAppBar() {
-    var currentTime by remember { mutableStateOf(LocalTime.now().withSecond(0)) }
-
-    LaunchedEffect(Unit) {
-        while (true) {
-            currentTime = LocalTime.now().withSecond(0)
-            delay(60_000L) // update once every minute
-        }
-    }
-
-    val timeFormatter = DateTimeFormatter.ofPattern("HH:mm")
     CenterAlignedTopAppBar(
         title = {
-            Column {
-                Text(
-                    modifier = Modifier.padding(16.dp),
-                    text = "Hey Sara :)",
+            Text(
+                modifier = Modifier.padding(16.dp),
+                text = "✨ Shine Shine ✨",
 //                    fontWeight = FontWeight.Bold,
-//                    fontStyle = FontStyle.Italic,
-                    fontSize = 20.sp,
-                    style = MaterialTheme.typography.titleMedium,
-                )
-                Text(
-                    text = currentTime.format(timeFormatter),
-                    color = Color(0xFFE0E0E0)
-                )
-            }
+                fontStyle = FontStyle.Italic,
+                fontSize = 20.sp,
+                style = MaterialTheme.typography.titleMedium,
+            )
         },
         colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-            containerColor = Color(0xFF00C1E8), // Replace with your custom color 'X'
-            titleContentColor = Color.White
+            containerColor = Color(0xFFFFF176), // Replace with your custom color 'X'
+            titleContentColor = Color.Black
         )
     )
 }
@@ -135,12 +112,15 @@ fun SunlightProgressBar(sunLightModel: SunLightModel) {
     val sunsetTime = LocalTime.parse(sunLightModel.sunset, timeFormatter)
     val currentTime = LocalTime.now()
 
-    val totalMinutes = sunriseTime.until(sunsetTime, java.time.temporal.ChronoUnit.MINUTES).toFloat()
-    val elapsedMinutes = sunriseTime.until(currentTime, java.time.temporal.ChronoUnit.MINUTES).toFloat()
+    val totalMinutes =
+        sunriseTime.until(sunsetTime, java.time.temporal.ChronoUnit.MINUTES).toFloat()
+    val elapsedMinutes =
+        sunriseTime.until(currentTime, java.time.temporal.ChronoUnit.MINUTES).toFloat()
     val progress = (elapsedMinutes / totalMinutes).coerceIn(0f, 1f)
     val progressColor = getGradientColor(progress)
 
-    val minutesLeft = currentTime.until(sunsetTime, java.time.temporal.ChronoUnit.MINUTES).coerceAtLeast(0)
+    val minutesLeft =
+        currentTime.until(sunsetTime, java.time.temporal.ChronoUnit.MINUTES).coerceAtLeast(0)
     val hoursLeft = minutesLeft / 60
     val remainingMinutes = minutesLeft % 60
 
@@ -171,7 +151,6 @@ fun SunlightProgressBar(sunLightModel: SunLightModel) {
                             isHovered = true
                         },
                         onPress = {
-                            val release = tryAwaitRelease()
                             isHovered = false
                         }
                     )
