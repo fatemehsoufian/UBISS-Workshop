@@ -70,6 +70,7 @@ dependencies {
     implementation(libs.camera.view)
     implementation(libs.retrofit)
     implementation(libs.converter.gson)
+    implementation(libs.work.runtime.ktx)
 
     ksp(libs.room.compiler)
     ksp(libs.hilt.compiler)
