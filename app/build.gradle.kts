@@ -68,6 +68,8 @@ dependencies {
     implementation(libs.camera.core)
     implementation(libs.camera.lifecycle)
     implementation(libs.camera.view)
+    implementation(libs.retrofit)
+    implementation(libs.converter.gson)
 
     ksp(libs.room.compiler)
     ksp(libs.hilt.compiler)

@@ -1,7 +1,6 @@
 package org.uni.myapplication
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -24,28 +23,28 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import org.uni.mobilecomputinghomework1.R
 
 @Composable
-fun InfoItem(item:InfoData) {
+fun InfoItem(item: InfoData) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
-            .padding(vertical = 8.dp)
+            .padding(vertical = 4.dp)
             .clip(RoundedCornerShape(24.dp))
             .fillMaxWidth()
             .border(
-                width = 1.dp, color = Color.DarkGray, shape = RoundedCornerShape(24.dp)
+                width = 1.dp, color = Color.LightGray, shape = RoundedCornerShape(24.dp)
             )
     ) {
         Image(
             painter = painterResource(id = item.image),
             contentDescription = "My PNG image",
-            modifier = Modifier.padding(start = 8.dp).
-            size(40.dp), // Set desired size
+            modifier = Modifier
+                .padding(start = 8.dp)
+                .size(40.dp), // Set desired size
             contentScale = ContentScale.Crop
         )
-        Spacer(modifier = Modifier.width(8.dp))
+//        Spacer(modifier = Modifier.width(4.dp))
         Column(
             modifier = Modifier
                 .padding(8.dp)
@@ -53,7 +52,7 @@ fun InfoItem(item:InfoData) {
                 .fillMaxWidth()
         ) {
             Text(
-                modifier = Modifier.padding(12.dp),
+                modifier = Modifier.padding(6.dp),
                 text = item.title,
                 fontWeight = FontWeight.Bold,
                 fontStyle = FontStyle.Italic,
