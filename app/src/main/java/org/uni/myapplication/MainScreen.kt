@@ -38,6 +38,21 @@ import kotlinx.coroutines.delay
 import org.uni.myapplication.ui.theme.MyApplicationTheme
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
+import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
+import androidx.compose.ui.Alignment
+import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.window.Popup
+import androidx.compose.ui.window.PopupProperties
+import androidx.compose.ui.unit.IntOffset
+
 
 @Composable
 fun MainScreen(viewModel: SunlightViewModel = hiltViewModel()) {
@@ -50,7 +65,7 @@ fun MainScreen(viewModel: SunlightViewModel = hiltViewModel()) {
                 .padding(it)
         ) {
             sunlightInfo?.let {
-                SunlightProgressBar(0.2f, it)
+                SunlightProgressBar(it)
             } ?: run {
                 CircularProgressIndicator()
             }
@@ -114,13 +129,28 @@ fun MyTopAppBar() {
 }
 
 @Composable
-fun SunlightProgressBar(progress: Float, sunLightModel: SunLightModel) {
+fun SunlightProgressBar(sunLightModel: SunLightModel) {
+    val timeFormatter = DateTimeFormatter.ofPattern("HH:mm")
+    val sunriseTime = LocalTime.parse(sunLightModel.sunrise, timeFormatter)
+    val sunsetTime = LocalTime.parse(sunLightModel.sunset, timeFormatter)
+    val currentTime = LocalTime.now()
+
+    val totalMinutes = sunriseTime.until(sunsetTime, java.time.temporal.ChronoUnit.MINUTES).toFloat()
+    val elapsedMinutes = sunriseTime.until(currentTime, java.time.temporal.ChronoUnit.MINUTES).toFloat()
+    val progress = (elapsedMinutes / totalMinutes).coerceIn(0f, 1f)
+    val progressColor = getGradientColor(progress)
+
+    val minutesLeft = currentTime.until(sunsetTime, java.time.temporal.ChronoUnit.MINUTES).coerceAtLeast(0)
+    val hoursLeft = minutesLeft / 60
+    val remainingMinutes = minutesLeft % 60
+
+    var isHovered by remember { mutableStateOf(false) }
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 8.dp)
     ) {
-        // Row for sunrise and sunset labels
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween
@@ -131,14 +161,77 @@ fun SunlightProgressBar(progress: Float, sunLightModel: SunLightModel) {
 
         Spacer(modifier = Modifier.height(4.dp))
 
-        // Progress Bar
-        LinearProgressIndicator(
-            progress = progress.coerceIn(0f, 1f),
+        Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(8.dp)
-        )
+                .pointerInput(Unit) {
+                    detectTapGestures(
+                        onLongPress = {
+                            isHovered = true
+                        },
+                        onPress = {
+                            val release = tryAwaitRelease()
+                            isHovered = false
+                        }
+                    )
+                }
+        ) {
+            Canvas(modifier = Modifier.fillMaxSize()) {
+                drawRect(color = Color.LightGray.copy(alpha = 0.3f))
+                drawRect(
+                    color = progressColor,
+                    size = androidx.compose.ui.geometry.Size(size.width * progress, size.height)
+                )
+            }
+
+            if (isHovered) {
+                Popup(
+                    alignment = Alignment.TopCenter,
+                    offset = IntOffset(0, -50),
+                    properties = PopupProperties(focusable = false)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .background(
+                                color = Color.White,
+                                shape = RoundedCornerShape(8.dp)
+                            )
+                            .border(
+                                width = 1.dp,
+                                color = Color.Black,
+                                shape = RoundedCornerShape(8.dp)
+                            )
+                            .padding(horizontal = 12.dp, vertical = 8.dp)
+                    ) {
+                        Text(
+                            text = "$hoursLeft hr $remainingMinutes min left",
+                            color = Color.Black,
+                            fontSize = 14.sp
+                        )
+                    }
+                }
+
+            }
+        }
+
     }
+}
+
+
+fun getGradientColor(progress: Float): Color {
+    val green = Color(0xFF4CAF50)  // Start
+    val red = Color(0xFFF44336)    // End
+
+    val r = lerp(green.red, red.red, progress)
+    val g = lerp(green.green, red.green, progress)
+    val b = lerp(green.blue, red.blue, progress)
+
+    return Color(r, g, b)
+}
+
+fun lerp(start: Float, stop: Float, amount: Float): Float {
+    return start + (stop - start) * amount
 }
 
 
