@@ -11,8 +11,7 @@ class PeriodicTaskWorker(
 ) : Worker(context, params) {
 
     override fun doWork(): Result {
-        // Do your background task here (e.g. check condition, send notification, etc.)
-        Log.d("PeriodicTaskWorker", "Running background task")
+        sendNotification(applicationContext, "Hey!", "This is your 15-min update.")
 
         return Result.success()
     }
