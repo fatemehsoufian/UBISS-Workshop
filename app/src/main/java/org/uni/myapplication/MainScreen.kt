@@ -52,6 +52,7 @@ fun MainScreen(viewModel: SunlightViewModel = hiltViewModel()) {
     val sunlightInfo by viewModel.sunlightInfo.collectAsState()
 
     Scaffold(topBar = { MyTopAppBar() }) {
+
         Column(
             modifier = Modifier
                 .padding(horizontal = 8.dp)

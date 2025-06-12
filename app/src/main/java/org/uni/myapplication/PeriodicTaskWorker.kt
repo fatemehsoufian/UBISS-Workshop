@@ -4,6 +4,7 @@ import android.content.Context
 import android.util.Log
 import androidx.work.Worker
 import androidx.work.WorkerParameters
+import kotlinx.coroutines.runBlocking
 
 class PeriodicTaskWorker(
     context: Context,
@@ -11,8 +12,32 @@ class PeriodicTaskWorker(
 ) : Worker(context, params) {
 
     override fun doWork(): Result {
-        sendNotification(applicationContext, "Hey!", "This is your 15-min update.")
+        return try {
+            // 1. Get data from API
+            val response = runBlocking {
+                RetrofitClient.apiService.getSunriseAlert()
+            }
 
-        return Result.success()
+            // 2. Show notification
+            NotificationHelper.sendNotification(
+                applicationContext,
+                "☀️ Sunrise Alert",
+                response.message
+            )
+
+            Log.d("SunriseWorker", "Notification sent: ${response.message}")
+            Result.success()
+        } catch (e: Exception) {
+            Log.e("SunriseWorker", "API Error", e)
+
+            // Fallback notification
+            NotificationHelper.sendNotification(
+                applicationContext,
+                "Daily Reminder",
+                "Don't forget to get some sunlight today!"
+            )
+
+            Result.retry() // Will retry later
+        }
     }
 }

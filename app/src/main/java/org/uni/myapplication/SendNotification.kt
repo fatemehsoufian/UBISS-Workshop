@@ -5,6 +5,7 @@ import android.app.NotificationManager
 import android.content.Context
 import android.os.Build
 import androidx.core.app.NotificationCompat
+import org.uni.mobilecomputinghomework1.R
 
 fun sendNotification(context: Context, title: String, message: String) {
     val channelId = "default_channel_id"
@@ -20,7 +21,7 @@ fun sendNotification(context: Context, title: String, message: String) {
     notificationManager.createNotificationChannel(channel)
 
     val builder = NotificationCompat.Builder(context, channelId)
-        .setSmallIcon(android.R.drawable.ic_dialog_info)  // Or your own icon
+        .setSmallIcon(R.drawable.sunrise)  // Or your own icon
         .setContentTitle(title)
         .setContentText(message)
         .setPriority(NotificationCompat.PRIORITY_DEFAULT)
