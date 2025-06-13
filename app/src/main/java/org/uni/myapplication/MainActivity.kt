@@ -90,12 +90,6 @@ class MainActivity : ComponentActivity() {
         // 3. Check manufacturer-specific restrictions
         checkManufacturerRestrictions()
 
-        // 4. Immediate test notification
-        NotificationHelper.sendNotification(
-            this,
-            "Initial Test",
-            "This is an initial test notification"
-        )
     }
 
     private fun checkManufacturerRestrictions() {

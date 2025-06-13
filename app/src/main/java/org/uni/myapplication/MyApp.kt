@@ -13,6 +13,7 @@ import java.util.concurrent.TimeUnit
 class MyApp: Application() {
     override fun onCreate() {
         super.onCreate()
+        scheduleDailyNotification(11, 2)
     }
 
     private fun scheduleDailyNotification(hour: Int, minute: Int) {
