@@ -8,7 +8,7 @@ data class SunLightModel(
     val cloudiness: Int,        // Percentage
     val temperature: Float,
     val humidity: Int,
-    val exposureAnalysis: ExposureAnalysis? = null  // From your API analysis
+    val exposureAnalysis: ExposureAnalysis? = null
 )
 
 data class ExposureAnalysis(

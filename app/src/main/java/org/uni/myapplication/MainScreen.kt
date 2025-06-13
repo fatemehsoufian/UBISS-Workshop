@@ -1,6 +1,5 @@
 package org.uni.myapplication
 
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -9,16 +8,24 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.Card
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -35,6 +42,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -45,6 +53,7 @@ import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupProperties
 import androidx.hilt.navigation.compose.hiltViewModel
 import kotlinx.coroutines.delay
+import org.uni.mobilecomputinghomework1.R
 import org.uni.myapplication.ui.theme.MyApplicationTheme
 import java.time.Duration
 import java.time.LocalDateTime
@@ -53,33 +62,117 @@ import java.time.format.DateTimeFormatter
 
 
 @Composable
-fun MainScreen(viewModel: SunlightViewModel= hiltViewModel()) {
+fun MainScreen(viewModel: SunlightViewModel = hiltViewModel()) {
     val sunlightInfo by viewModel.sunlightInfo.collectAsState()
-
-    Scaffold(topBar = { MyTopAppBar() }) {
-
+    val weatherIcon = when (sunlightInfo?.weatherDescription) {
+        "Cloudy" -> R.drawable.cloudy
+        "Sunny" -> R.drawable.sunny
+        "Rain" -> R.drawable.rainy
+        else -> R.drawable.cloudy
+    }
+    Scaffold(topBar = { MyTopAppBar() }) { paddingValues ->
         Column(
             modifier = Modifier
+                .fillMaxSize()
                 .padding(horizontal = 8.dp)
-                .padding(it)
+                .padding(paddingValues)
         ) {
-            sunlightInfo?.let {info->
+            // Sunlight Progress or Loading
+            sunlightInfo?.let { info ->
                 SunlightProgressBar(info)
             } ?: run {
-                CircularProgressIndicator()
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(8.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    CircularProgressIndicator()
+                }
             }
+
+            // Cards row
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 16.dp),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                // Weather Card
+                Card(
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(end = 8.dp)
+                        .height(150.dp), // FIXED height
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(16.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        Icon(
+                            painter = painterResource(id = weatherIcon),
+                            modifier = Modifier.size(60.dp),
+                            contentDescription = "My Icon",
+                            tint = Color.Unspecified // Or apply a color
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = sunlightInfo?.weatherDescription ?: "Cloudy",
+                            style = MaterialTheme.typography.titleMedium
+                        )
+                        Text(
+                            text = "${sunlightInfo?.temperature ?: 22}°C",
+                            style = MaterialTheme.typography.titleMedium
+                        )
+                    }
+                }
+
+                // Sunlight Exposure Card
+                Card(
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(end = 8.dp)
+                        .height(150.dp), // FIXED height
+                ) {
+                    Column(
+                        modifier = Modifier.padding(16.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Icon(
+                            imageVector = if (true) Icons.Default.Search else Icons.Default.Clear,
+                            contentDescription = "Sunlight Status",
+                            modifier = Modifier.size(48.dp),
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = if (true) "Got sunlight ☀️" else "No sunlight today",
+                            style = MaterialTheme.typography.titleMedium
+                        )
+                    }
+                }
+            }
+
+            // Divider and section title
+            HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp))
+
             Text(
-                modifier = Modifier.padding(12.dp),
+                modifier = Modifier.padding(horizontal = 12.dp),
                 text = "Benefits of Sunlight",
                 fontWeight = FontWeight.Bold,
                 fontStyle = FontStyle.Italic,
                 fontSize = 24.sp,
                 style = MaterialTheme.typography.titleMedium,
             )
+
+            // Lazy column with benefits
             val quoteList = StaticInfoData.InfoList
             LazyColumn(
                 modifier = Modifier
-                    .fillMaxSize()
+                    .fillMaxWidth()
+                    .padding(bottom = 16.dp)
             ) {
                 items(quoteList) { quote ->
                     InfoItem(quote)
@@ -174,12 +267,12 @@ fun SunlightProgressBar(sunLightModel: SunLightModel) {
             Text(text = "🌇 Sunset: ${sunLightModel.sunset}", fontSize = 14.sp)
         }
 
-        Spacer(modifier = Modifier.height(4.dp))
+        Spacer(modifier = Modifier.height(8.dp))
 
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(8.dp)
+                .height(24.dp) // Bigger progress bar
                 .pointerInput(Unit) {
                     detectTapGestures(
                         onLongPress = { isHovered = true },
@@ -187,13 +280,23 @@ fun SunlightProgressBar(sunLightModel: SunLightModel) {
                     )
                 }
         ) {
-            Canvas(modifier = Modifier.fillMaxSize()) {
-                drawRect(color = Color.LightGray.copy(alpha = 0.3f))
-                drawRect(
-                    color = getGradientColor(progress),
-                    size = androidx.compose.ui.geometry.Size(size.width * progress, size.height)
-                )
-            }
+            // Background
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.LightGray.copy(alpha = 0.3f), RoundedCornerShape(12.dp))
+            )
+
+            // Progress
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth(progress)
+                    .fillMaxHeight()
+                    .background(
+                        color = getVividSunProgressColor(progress), // Green to red gradient
+                        shape = RoundedCornerShape(12.dp)
+                    )
+            )
 
             if (isHovered) {
                 Popup(
@@ -218,8 +321,12 @@ fun SunlightProgressBar(sunLightModel: SunLightModel) {
                             text = when {
                                 currentDateTime.isBefore(todaySunrise) ->
                                     "Sunrise in ${todaySunrise.toLocalTime().format(timeFormatter)}"
+
                                 currentDateTime.isAfter(todaySunset) ->
-                                    "Sunset was at ${todaySunset.toLocalTime().format(timeFormatter)}"
+                                    "Sunset was at ${
+                                        todaySunset.toLocalTime().format(timeFormatter)
+                                    }"
+
                                 else -> "$hoursLeft hr $minutesLeft min left"
                             },
                             color = Color.Black,
@@ -232,21 +339,51 @@ fun SunlightProgressBar(sunLightModel: SunLightModel) {
     }
 }
 
-fun getGradientColor(progress: Float): Color {
-    val green = Color(0xFF4CAF50)  // Start
-    val red = Color(0xFFF44336)    // End
+private fun getVividSunProgressColor(progress: Float): Color {
+    // Bright green (lime) to bright red
+    val brightGreen = Color(0xFF00FF00)  // Vibrant green
+    val brightRed = Color(0xFFFF0000)    // Vibrant red
 
-    val r = lerp(green.red, red.red, progress)
-    val g = lerp(green.green, red.green, progress)
-    val b = lerp(green.blue, red.blue, progress)
+    // Blend colors based on progress
+    return when {
+        progress < 0.5f -> {
+            // Transition from green to yellow in first half
+            val adjustedProgress = progress * 2
+            Color(
+                red = brightGreen.red + (Color.Yellow.red - brightGreen.red) * adjustedProgress,
+                green = brightGreen.green + (Color.Yellow.green - brightGreen.green) * adjustedProgress,
+                blue = brightGreen.blue + (Color.Yellow.blue - brightGreen.blue) * adjustedProgress
+            )
+        }
 
-    return Color(r, g, b)
+        else -> {
+            // Transition from yellow to red in second half
+            val adjustedProgress = (progress - 0.5f) * 2
+            Color(
+                red = Color.Yellow.red + (brightRed.red - Color.Yellow.red) * adjustedProgress,
+                green = Color.Yellow.green + (brightRed.green - Color.Yellow.green) * adjustedProgress,
+                blue = Color.Yellow.blue + (brightRed.blue - Color.Yellow.blue) * adjustedProgress
+            )
+        }
+    }
 }
 
-fun lerp(start: Float, stop: Float, amount: Float): Float {
-    return start + (stop - start) * amount
+@Preview(showBackground = true)
+@Composable
+fun ProgressBarPreview() {
+    MyApplicationTheme {
+        SunlightProgressBar(
+            sunLightModel = SunLightModel(
+                sunset = "19:01",
+                sunrise = "06:10",
+                cloudiness = 1,
+                weatherDescription = "",
+                temperature = 12.0f,
+                humidity = 1
+            )
+        )
+    }
 }
-
 
 @Preview(showBackground = true)
 @Composable
